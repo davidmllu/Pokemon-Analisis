@@ -1,0 +1,55 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("pokemon.csv")
+
+df.shape
+df.info()
+
+#Se quitan las resistencias de tipos por ahora
+
+resistence = ['against_bug', 'against_dark', 'against_dragon', 'against_electric', 
+              'against_fairy', 'against_fight', 'against_fire', 'against_flying', 
+              'against_ghost', 'against_grass', 'against_ground', 'against_ice', 
+              'against_normal', 'against_poison', 'against_psychic', 'against_rock', 
+              'against_steel', 'against_water']
+
+df_pk = df.drop(columns = resistence)
+
+#Eliminar nombre en japones y clasificación. Son irrelevantes
+
+df_pk = df_pk.drop(columns = ['japanese_name', 'classfication'])
+
+df_pk.info()
+
+#Se organizan las columnas
+
+df_pk = df_pk.reindex(columns=['pokedex_number', 'name', 'type1','type2', 'percentage_male','height_m',
+                               'weight_kg', 'base_egg_steps', 'base_happiness',
+                               'capture_rate', 'experience_growth', 'generation', 'is_legendary', 
+                               'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed','base_total', 'abilities'])
+
+
+#Análisis de nulos
+
+def nulos(df):
+  na_sum = df.isnull().sum()
+  na_ratio = ((na_sum/len(df)) * 100)#.sort_values(ascending = False)
+  col_type = df.dtypes
+  nunique = df.nunique()
+  nulls = pd.DataFrame(data = {'Num_nulos':na_sum, 'Ratio_nulos':na_ratio, 'Col_type':col_type, 'Nunique_values':nunique}) #.reset_index()
+  return nulls
+
+nulos(df_pk)
+
+#El segundo tipo se cambia por none ya que significa que no tiene tipo secundario El porcentaje de macho se cambia a 0 porque significa que no puede ser macho
+
+df_pk['type2'] = df_pk['type2'].fillna('None')
+df_pk['percentage_male'] = df_pk['percentage_male'].fillna(0)
+
+#La altura y el peso no son tan importantes y eliminar las filas quitaria analisis en otras columnas. Se pone en 0 y no sería un cambio tan significante
+
+df_pk['height_m'] = df_pk['height_m'].fillna(0)
+df_pk['weight_kg'] = df_pk['weight_kg'].fillna(0)
+
+nulos(df_pk)
